@@ -66,8 +66,7 @@ class Mueble:
         valor_de_extras = 0
 
         for extra in self.lista_de_extras:
-
-            precio_extra  = extra.precio
+            precio_extra = extra.precio
 
             valor_de_extras = valor_de_extras + precio_extra
 
@@ -80,7 +79,7 @@ class Mueble:
         return costo_de_mueble
 
 
-        pass
+        # TODO: pass
 
 
 class Pieza:
@@ -109,6 +108,7 @@ def total_componentes(lista_de_piezas,lista_extra):
     return len(lista_de_piezas) +len(lista_extra)
 
 
+# todo: sacar la definicion de estas instancias a otro archivo
 lista_de_piezas = []
 estante = Pieza(50,30,2,'estante')
 puerta = Pieza(58,35,2.3,'puerta bajo')
@@ -399,4 +399,9 @@ def separar_sub_20(lista_de_personas):
 
 
 
+class Menu:
+    def __init__(self):
+        #todo: definir el metodo init
 
+    def choose_menu(self): # elegir menu
+        # todo: definir una funcion que llame a un menu
