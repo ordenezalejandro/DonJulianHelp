@@ -239,8 +239,10 @@ class RegistroDeVentas:
         new_venta.poner_mueble(mueble)
         self.agregar_venta(new_venta)
 
+    def guardar_ventas(self):
 
-
+        with open('registro_de_ventas.json', 'w') as archivo:
+            json.dump(self.listas_de_ventas, archivo)
 
 
 """agregar el methodo agregar_venta,  a la clase RegistroVenta, 
