@@ -2,6 +2,7 @@ import datetime
 import json
 
 
+
 class Mueble:
     def __init__(self,nombre, descripcion,precio,lista_de_piezas = None ,lista_de_extras = None):
         self.nombre = nombre
@@ -100,9 +101,6 @@ class Extra:
         self.descripcion = descripcion
         self.precio = precio
 
-    def cantidad_extra(self):
-        self.cantidad_extra = lista_extra # todo: corregir esto, que es lista_extra, donde se declara
-        return len(lista_de_piezas)
 
 class Cliente:
 
@@ -266,6 +264,9 @@ class RegistroDeClientes:
         with open ('registro_de_clientes.json','r') as archivo:
 
             self.lista_de_clientes = json.load(archivo)
+
+class RegistroDeMuebles:
+    pass
 
 class Menu:
     def __init__(self):
