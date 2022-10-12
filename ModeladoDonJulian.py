@@ -1,6 +1,7 @@
 import datetime
 import json
-
+import os.path
+from operator import attrgetter
 
 class Mueble:
     def __init__(self,nombre, descripcion,precio,lista_de_piezas = None ,lista_de_extras = None):
@@ -100,9 +101,9 @@ class Extra:
         self.descripcion = descripcion
         self.precio = precio
 
-    def cantidad_extra(self):
-        self.cantidad_extra = lista_extra # todo: corregir esto, que es lista_extra, donde se declara
-        return len(lista_de_piezas)
+    # def cantidad_extra(self):
+    #     self.cantidad_extra = lista_extra # todo: corregir esto, que es lista_extra, donde se declara
+    #     return len(lista_de_piezas)
 
 class Cliente:
 
@@ -254,16 +255,25 @@ class RegistroDeClientes:
         return False
 
 
-    def guardar_cliente(self):
-
+    def guardar_cliente(self): # todo: el nombre deberia ser en plural
         with open ('registro_de_clientes.json', 'w') as archivo:
-            json.dump(self.listas_de_clientes, archivo)
+            # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan string y numeros, como clientes,
+            #  es un ojbeto no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
+            # eso seria lo mismo que hacer un for en la lista de cliente, y acceder al attributo __dict_):
+            # for cliente in self.lista_de_clientes:
+            #   result.append(cliente.__dict__)
+            json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
 
     def cargar_cliente(self):
+        if os.path.exists('registro_de_clientes.json'):
+            with open ('registro_de_clientes.json','r') as archivo:
+                self.lista_de_clientes = json.load(archivo)
+        else:
+            with open('registro_de_clientes.json', 'w') as archivo:
+                archivo.write(json.dumps([]))
+                self.lista_de_clientes = []
+        return self.lista_de_clientes
 
-        with open ('registro_de_clientes.json','r') as archivo:
-
-            self.lista_de_clientes = json.load(archivo)
 
 class Menu:
     def __init__(self):
