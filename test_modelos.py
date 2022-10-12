@@ -1,4 +1,5 @@
-from ModeladoDonJulian import Mueble,Pieza, Extra,total_componentes, Cliente, Venta, RegistroDeVentas
+from ModeladoDonJulian import Mueble,Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes
+from ejercicios import total_componentes
 from unittest.mock import patch
 from datetime import datetime
 import unittest
@@ -113,8 +114,6 @@ class Test_total_de_componente(unittest.TestCase):
     # # el test. debe instanciar un mueble, agregarle
     # # 2  piezas, 2 extra . con sus respectivo precio
 
-    #
-
     def test_devolver_costo_de_mueble(self):
         cocina = Mueble('cocina', '1.20, 4 cajones',1500)
         frente_cajon = Pieza(15, 45, 2, 'frente cajon',5)
@@ -133,6 +132,18 @@ class Test_total_de_componente(unittest.TestCase):
         # sus extras
 
         self.assertEqual(40,cocina.devolver_costo_de_mueble(),'no se calculo bien el costo')
+
+    #@patch('builtins.input', side_efect=['ordonez', 'jairo', '35'])
+    def test_guardar_cliente(self):
+        registro_cliente = RegistroDeClientes()
+        self.assertEqual(2, len(registro_cliente.lista_de_clientes))
+        jairo = Cliente('jairo', 'ordonez' , 35)
+        ale = Cliente('alejandro', 'ordonez',38)
+        registro_cliente.agregar_cliente(jairo)
+        registro_cliente.agregar_cliente(ale)
+        registro_cliente.guardar_clientes()
+        clientes = registro_client e.cargar_clientes()
+        self.assertEqual(len(clientes), 2, 'No esta cargando todos los datos')
 
 
 

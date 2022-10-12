@@ -1,4 +1,4 @@
-from .ModeladoDonJulian import Extra, Pieza, Mueble
+from ModeladoDonJulian import Extra, Pieza, Mueble
 def total_componentes(lista_de_piezas,lista_extra):
     return len(lista_de_piezas) +len(lista_extra)
 
