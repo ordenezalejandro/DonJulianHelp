@@ -227,7 +227,7 @@ y la agrega a la lista."""
 class RegistroDeClientes:
     def __init__(self):
         self.listas_de_clientes = []
-        self.cargar_cliente()
+        self.cargar_clientes()
 
     def agregar_cliente(self,cliente):
         assert type(cliente) == Cliente
@@ -255,16 +255,18 @@ class RegistroDeClientes:
         return False
 
 
-    def guardar_cliente(self): # todo: el nombre deberia ser en plural
+    def guardar_clientes(self): # todo: el nombre deberia ser en plural
         with open ('registro_de_clientes.json', 'w') as archivo:
-            # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan string y numeros, como clientes,
-            #  es un ojbeto no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
+            # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
+            #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
             # eso seria lo mismo que hacer un for en la lista de cliente, y acceder al attributo __dict_):
-            # for cliente in self.lista_de_clientes:
-            #   result.append(cliente.__dict__)
-            json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
+            clientes = []
+            for cliente in self.lista_de_clientes:
+               clientes.append(cliente.__dict__) # todo objeto en python tiene el atributo __dict__. que representa la instancia
+            json.dump(clientes, archivo)
+            # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
 
-    def cargar_cliente(self):
+    def cargar_clientes(self):
         if os.path.exists('registro_de_clientes.json'):
             with open ('registro_de_clientes.json','r') as archivo:
                 self.lista_de_clientes = json.load(archivo)

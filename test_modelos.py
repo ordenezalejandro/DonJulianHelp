@@ -141,8 +141,8 @@ class Test_total_de_componente(unittest.TestCase):
         ale = Cliente('alejandro', 'ordonez',38)
         registro_cliente.agregar_cliente(jairo)
         registro_cliente.agregar_cliente(ale)
-        registro_cliente.guardar_cliente()
-        clientes = registro_cliente.cargar_cliente()
+        registro_cliente.guardar_clientes()
+        clientes = registro_client e.cargar_clientes()
         self.assertEqual(len(clientes), 2, 'No esta cargando todos los datos')
 
 
