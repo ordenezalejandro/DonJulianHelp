@@ -1,6 +1,7 @@
 import datetime
 import json
 import os.path
+import pickle
 from operator import attrgetter
 
 class Mueble:
@@ -17,6 +18,9 @@ class Mueble:
             self.lista_de_extras = lista_de_extras
         self.precio = precio
         print('mueble_nuevo')
+
+    def __eq__(self, other):
+        return self.nombre == other.nombre and self.descripcion == self.descripcion and self.precio == self.precio
 
     def agregar_pieza(self,pieza):
         assert type(pieza) == Pieza
@@ -121,6 +125,9 @@ class Cliente:
     def __gt__(self,otro_cliente):
         return self.edad> otro_cliente.edad
 
+    def __repr__(self):
+        return f'Cliente(**{self.__dict__})'
+
 class Venta:
     def __init__(self):
         self.cliente = None
@@ -223,7 +230,6 @@ class RegistroDeVentas:
 que toma como una parametro una instancia de venta, 
 y la agrega a la lista."""
 
-
 class RegistroDeClientes:
     def __init__(self):
         self.listas_de_clientes = []
@@ -231,7 +237,7 @@ class RegistroDeClientes:
 
     def agregar_cliente(self,cliente):
         assert type(cliente) == Cliente
-        self.listas_de_clientes.append(cliente)
+        self.lista_de_clientes.append(cliente)
 
     def agregar_cliente_input (self):
         apellido = input ('apellido del cliente')
@@ -256,7 +262,10 @@ class RegistroDeClientes:
 
 
     def guardar_clientes(self): # todo: el nombre deberia ser en plural
-        with open ('registro_de_clientes.json', 'w') as archivo:
+        directory = os.path.split(__file__)[0]
+        data_clientes_path = os.path.join(directory, 'registro_de_clientes.json')
+
+        with open(data_clientes_path, 'w') as archivo:
             # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
             #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
             # eso seria lo mismo que hacer un for en la lista de cliente, y acceder al attributo __dict_):
@@ -267,15 +276,85 @@ class RegistroDeClientes:
             # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
 
     def cargar_clientes(self):
-        if os.path.exists('registro_de_clientes.json'):
-            with open ('registro_de_clientes.json','r') as archivo:
-                self.lista_de_clientes = json.load(archivo)
+        directory = os.path.split(__file__)[0]
+        data_clientes_path = os.path.join(directory,'registro_de_clientes.json' )
+        if os.path.exists(data_clientes_path):
+            with open(data_clientes_path,'r') as archivo:
+                self.lista_de_clientes = list(map(lambda x: Cliente(**x), json.load(archivo)))
         else:
-            with open('registro_de_clientes.json', 'w') as archivo:
+            with open(data_clientes_path, 'w') as archivo:
                 archivo.write(json.dumps([]))
                 self.lista_de_clientes = []
         return self.lista_de_clientes
 
+
+class Serializable:
+    def __init__(self, clase):
+        self.class_name = clase.__name__
+        self.clase = clase
+        directory = os.path.split(__file__)[0]
+        self.lista = []
+        # setattr(self, f'lista_de{self.class_name}s', None)
+        self.data_path = os.path.join(directory, 'data', f'registro_de_{self.class_name}.json')
+        self.cargar()
+
+    def get_lista(self):
+        return self.lista
+
+    def cargar(self):
+        if os.path.exists(self.data_path):
+            with open(self.data_path, 'rb') as archivo:
+                # setattr(self.get_lista(), list(map(lambda x: Cliente(**x), json.load(archivo))))
+                self.lista = pickle.load(archivo)
+        else:
+            with open(self.data_path, 'wb') as archivo:
+                pickle.dump([], archivo)
+                self.lista = []
+        return self.get_lista()
+
+
+    def guardar(self):  # todo: el nombre deberia ser en plural
+        with open(self.data_path, 'wb') as archivo:
+            # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
+            #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
+            # eso seria lo mismo que hacer un for en la lista de cliente, y acceder al attributo __dict_):
+
+            # for instance in self.get_lista():
+            #     instances.append(instance.__dict__)  # todo objeto en python tiene el atributo __dict__. que representa la instancia
+            pickle.dump(self.lista, archivo)
+            # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
+
+    def agregar(self, instance):
+        assert type(instance) == self.clase
+        if instance in self.get_lista():
+            print(f'el {self.class_name} ya ha sido cargado')
+        else:
+            self.get_lista().append(instance)
+
+    def agregar_input(self):
+        parametros= self.pedir_informacion_input()
+        nueva_instancia = self.clase(**parametros)
+        if nueva_instancia in self.get_lista():
+            print(f'La instancia de {self.class_name} con valores {self.__dict__} ya existe')
+        else:
+            self.get_lista().append(nueva_instancia)
+        return nueva_instancia
+
+    def pedir_informacion_input(self):
+        dictionary = {}
+        # deberia devolver un
+
+
+class RegistroDeMuebles(Serializable):
+    def __init__(self):
+        super(RegistroDeMuebles, self).__init__(Mueble)
+
+    def pedir_informacion_input(self):
+        parametros = {}
+        parametros['nombre'] = input('Ingrese el nombre del mueble\n')
+        parametros['descripcion'] = input('Ingrese el descripcion del mueble\n')
+        parametros['precio'] = input('Ingrese el precio del mueble\n')
+        return parametros
 
 class Menu:
     def __init__(self):

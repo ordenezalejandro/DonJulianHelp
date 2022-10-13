@@ -1,4 +1,4 @@
-from ModeladoDonJulian import Mueble,Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes
+from ModeladoDonJulian import Mueble,Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes,RegistroDeMuebles
 from ejercicios import total_componentes
 from unittest.mock import patch
 from datetime import datetime
@@ -136,15 +136,24 @@ class Test_total_de_componente(unittest.TestCase):
     #@patch('builtins.input', side_efect=['ordonez', 'jairo', '35'])
     def test_guardar_cliente(self):
         registro_cliente = RegistroDeClientes()
-        self.assertEqual(2, len(registro_cliente.lista_de_clientes))
+        # self.assertEqualssertEqual(2, len(registro_cliente.lista_de_clientes))
         jairo = Cliente('jairo', 'ordonez' , 35)
         ale = Cliente('alejandro', 'ordonez',38)
         registro_cliente.agregar_cliente(jairo)
         registro_cliente.agregar_cliente(ale)
         registro_cliente.guardar_clientes()
-        clientes = registro_client e.cargar_clientes()
+        clientes = registro_cliente.cargar_clientes()
         self.assertEqual(len(clientes), 2, 'No esta cargando todos los datos')
 
+    def test_guardar_mueble(self):
+        registro_mueble = RegistroDeMuebles()
+        cocina = Mueble('cocina', 'antigua', 59)
+        ropero = Mueble('ropero', 'romano', 30)
+        registro_mueble.agregar(cocina)
+        registro_mueble.agregar(ropero)
+        registro_mueble.guardar()
+        muebles = registro_mueble.cargar()
+        self.assertEqual(2, len(muebles))
 
 
 if __name__ == '__main__':
