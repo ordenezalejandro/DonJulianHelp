@@ -1,6 +1,7 @@
 import datetime
 import json
 import os.path
+import pickle
 from operator import attrgetter
 
 class Mueble:
@@ -127,6 +128,9 @@ class Cliente:
     def __repr__(self):
         return f'Cliente(**{self.__dict__})'
 
+    def __str__(self):
+        return f'fullname: {self.nombre}  {self.apellido}'
+
 class Venta:
     def __init__(self):
         self.cliente = None
@@ -184,8 +188,6 @@ class RegistroDeVentas:
     def devolver_cantidad_ventas(self):
         return len (self.lista_de_ventas)
 
-
-
     def devolver_las_ventas_de(self,cliente):
         coincidencia = []
 
@@ -230,70 +232,13 @@ que toma como una parametro una instancia de venta,
 y la agrega a la lista."""
 
 
-class RegistroDeClientes:
-    def __init__(self):
-        self.listas_de_clientes = []
-        self.cargar_clientes()
-
-    def agregar_cliente(self,cliente):
-        assert type(cliente) == Cliente
-        self.lista_de_clientes.append(cliente)
-
-    def agregar_cliente_input (self):
-        apellido = input ('apellido del cliente')
-        nombre = input ('nombre del cliente')
-        edad = input ('ingrese la edad del cliente')
-        if self.existe_cliente(nombre,apellido):
-            cliente = self.obtener_cliente(nombre,apellido)
-
-        else :
-
-            cliente = Cliente (apellido =apellido,nombre = nombre,edad =edad)
-
-            self.agregar_cliente(cliente)
-
-        return cliente
-
-    def existe_cliente(self,nombre,apellido):
-        for cliente in self.lista_de_clientes:
-            if cliente.nombre == nombre and cliente.apellido == apellido:
-                return True
-        return False
-
-
-    def guardar_clientes(self): # todo: el nombre deberia ser en plural
-        directory = os.path.split(__file__)[0]
-        data_clientes_path = os.path.join(directory, 'registro_de_clientes.json')
-
-        with open(data_clientes_path, 'w') as archivo:
-            # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
-            #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
-            # eso seria lo mismo que hacer un for en la lista de cliente, y acceder al attributo __dict_):
-            clientes = []
-            for cliente in self.lista_de_clientes:
-               clientes.append(cliente.__dict__) # todo objeto en python tiene el atributo __dict__. que representa la instancia
-            json.dump(clientes, archivo)
-            # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
-
-    def cargar_clientes(self):
-        directory = os.path.split(__file__)[0]
-        data_clientes_path = os.path.join(directory,'registro_de_clientes.json' )
-        if os.path.exists(data_clientes_path):
-            with open(data_clientes_path,'r') as archivo:
-                self.lista_de_clientes = list(map(lambda x: Cliente(**x), json.load(archivo)))
-        else:
-            with open(data_clientes_path, 'w') as archivo:
-                archivo.write(json.dumps([]))
-                self.lista_de_clientes = []
-        return self.lista_de_clientes
-
 
 class Serializable:
     def __init__(self, clase):
         self.class_name = clase.__name__
         self.clase = clase
         directory = os.path.split(__file__)[0]
-        self.lista = []
+        self.lista = [] # este seria en que antes usamos, lista_de_clientes, lista_de_muebgles etc
         # setattr(self, f'lista_de{self.class_name}s', None)
         self.data_path = os.path.join(directory, 'data', f'registro_de_{self.class_name}.json')
         self.cargar()
@@ -312,8 +257,7 @@ class Serializable:
                 self.lista = []
         return self.get_lista()
 
-
-    def guardar(self):  # todo: el nombre deberia ser en plural
+    def guardar(self):
         with open(self.data_path, 'wb') as archivo:
             # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
             #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
@@ -332,7 +276,7 @@ class Serializable:
             self.get_lista().append(instance)
 
     def agregar_input(self):
-        parametros= self.pedir_informacion_input()
+        parametros = self.pedir_informacion_input()
         nueva_instancia = self.clase(**parametros)
         if nueva_instancia in self.get_lista():
             print(f'La instancia de {self.class_name} con valores {self.__dict__} ya existe')
@@ -341,8 +285,30 @@ class Serializable:
         return nueva_instancia
 
     def pedir_informacion_input(self):
-        dictionary = {}
-        # deberia devolver un
+        """
+        esto una interfaz, que deberia los datos necesario para crear una instancia nueva
+        debe devolver una dictionario con los parametros para instancianr una nueva instancia de la clase.
+        :return:
+        """
+        raise Exception('Este methodo deberia ser implementado')
+
+    def listar(self):
+        for element in self.lista:
+            print(element)
+
+class RegistroDeClientes(Serializable):
+    def __init__(self):
+       super(RegistroDeClientes, self).__init__(Cliente)
+
+    def agregar_cliente_input (self):
+        parametro = {} #dict()
+        parametro['apellido'] = input ('apellido del cliente')
+        parametro['nombre'] = input ('nombre del cliente')
+        parametro['edad'] = input ('ingrese la edad del cliente')
+
+        return parametro
+
+
 
 
 class RegistroDeMuebles(Serializable):
