@@ -1,7 +1,6 @@
 import datetime
 import json
 import os.path
-import pickle
 from operator import attrgetter
 
 class Mueble:
@@ -229,6 +228,7 @@ class RegistroDeVentas:
 """agregar el methodo agregar_venta,  a la clase RegistroVenta, 
 que toma como una parametro una instancia de venta, 
 y la agrega a la lista."""
+
 
 class RegistroDeClientes:
     def __init__(self):
