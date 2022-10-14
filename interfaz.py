@@ -6,7 +6,7 @@ este archivo contiene interfaz, con las siguientes funcionalidades
 - ejecutar comando
 - salir
 """
-from .ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
+from ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
 
 MENU = """
 1- agregar cliente
@@ -73,7 +73,7 @@ def imprimir_menu():
 
 def leer_comando():
     """leer comando"""
-    comando = input("ingrese el comando")
+    comando = int(input("ingrese el comando"))
     return comando
 
     pass

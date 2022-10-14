@@ -322,6 +322,21 @@ class RegistroDeMuebles(Serializable):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
 
+class RegistroDePieza(Serializable):
+    def __init__(self):
+        super(RegistroDePieza,self).__init__(Pieza)
+
+    def pedir_informacion_input(self):
+        """
+        (self,alto,ancho,espesor,descripcion,precio=1)
+        """
+        parametros = {}
+        parametros['alto'] = input('Ingrese el alto de la pieza\n')
+        parametros['ancho'] = input('Ingrese el ancho de la pieza\n')
+        parametros['espesor'] = input('Ingrese el espesor de la pieza\n')
+        parametros['descripcion'] = input('Ingrese una descripcion de la pieza\n')
+        return parametros
+
 class Menu:
     def __init__(self):
         #todo: definir el metodo init
