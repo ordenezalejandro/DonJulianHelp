@@ -132,15 +132,15 @@ class Cliente:
         return f'fullname: {self.nombre}  {self.apellido}'
 
 class Venta:
-    def __init__(self):
-        self.cliente = None
-        self.mueble = None
+    def __init__(self, cliente=None, mueble=None,fecha_de_entrega=None,total=None,adelanto=0,motivo=None):
+        self.cliente =cliente
+        self.mueble = mueble
         self.fecha_de_venta = datetime.datetime.now()
-        self.fecha_de_entrega = None
-        self.total = None
-        self.seña = None
-        self.motivo = None
-        self.saldo = None
+        self.fecha_de_entrega = fecha_de_entrega
+        self.total = total
+        self.adelanto = adelanto
+        self.motivo = motivo
+        self.saldo = self.total - self.adelanto
 
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
@@ -172,65 +172,6 @@ class Venta:
     def guardar_cargar(self):
         with open('registro_de_ventas.json', 'r') as archivo:
             self.lista_de_ventas = json.load(archivo)
-
-
-
-
-class RegistroDeVentas:
-    def __init__(self):
-        self.lista_de_ventas = []
-        self.registro_de_clientes = RegistroDeClientes()
-
-    def agregar_venta(self,venta):
-        assert type(venta) == Venta
-        self.lista_de_ventas.append(venta)
-
-    def devolver_cantidad_ventas(self):
-        return len (self.lista_de_ventas)
-
-    def devolver_las_ventas_de(self,cliente):
-        coincidencia = []
-
-        for venta in self.lista_de_ventas:
-            if self.venta.cliente.__eq__(cliente):
-                coincidencia.append(venta)
-        return coincidencia
-
-
-
-
-    # recorra la lista de venta-->for
-    # compare q los nombres sean iguales--> ==
-    #si son iguales agregarlos a la lista devolver_ventas_de--> append.devolver_las_ventas_de
-    # retornar esa lista de coincidencias
-
-
-
-    def listar_ventas(self):
-        """definir el methodo listar_ventas, de la clase registro_ventas,
-        que no toma parametro, y que recorre la lista de ventas, e imprime,
-         el nombre y apellido del cleinte, el nombre del mueble,
-         y la fecha_de inicio, la fecha de salida"""
-
-        for venta in self.lista_de_ventas:
-            print('nombre{},apelllido{},mueble{},fecha de venta{},fecha de entrega{}'.format(venta.cliente.nombre,venta.cliente.apellido,venta.mueble,venta.fecha_de_venta,venta.fecha_de_entrega))
-
-    def registrar_venta_input(self):
-        cliente = self.registro_de_clientes.agregar_cliente_input()
-        new_venta = Venta()
-        new_venta.poner_cliente(cliente)
-        mueble = self.registro_de_mueble.agregar_mueble_input()
-        new_venta.poner_mueble(mueble)
-        self.agregar_venta(new_venta)
-
-
-
-
-
-"""agregar el methodo agregar_venta,  a la clase RegistroVenta, 
-que toma como una parametro una instancia de venta, 
-y la agrega a la lista."""
-
 
 
 class Serializable:
@@ -295,6 +236,11 @@ class Serializable:
     def listar(self):
         for element in self.lista:
             print(element)
+    #
+    # def obtener_instance(self, **kargs):
+    #     claves = self.ingrese_claves()
+
+
 
 class RegistroDeClientes(Serializable):
     def __init__(self):
@@ -310,7 +256,6 @@ class RegistroDeClientes(Serializable):
 
 
 
-
 class RegistroDeMuebles(Serializable):
     def __init__(self):
         super(RegistroDeMuebles, self).__init__(Mueble)
@@ -321,6 +266,37 @@ class RegistroDeMuebles(Serializable):
         parametros['descripcion'] = input('Ingrese el descripcion del mueble\n')
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
+
+class RegistroDeExtra(Serializable):
+    def __init__(self):
+        super(RegistroDeExtra, self).__init__(Pieza)
+
+    def pedir_informacion_input(self):
+        parametros = {}
+        parametros['nombre'] = input('Ingrese el nombre del mueble\n')
+        parametros['descripcion'] = input('Ingrese el descripcion del mueble\n')
+        parametros['precio'] = input('Ingrese el precio del mueble\n')
+        return parametros
+
+class RegistroDeVenta(Serializable):
+
+    def __init__(self):
+        super(RegistroDeVenta).__init__(Venta)
+        self.registro_de_clientes = RegistroDeClientes()
+        self.registro_de_muebles = RegistroDeMuebles()
+
+    def pedir_informacion_input(self):
+        parametros = {}
+        parametros['cliente'] = self.registro_de_clientes.agregar_input()
+        parametros['mueble'] = self.registro_de_muebles.agregar_input()
+        parametros['fecha_de_venta'] = datetime.datetime.now()
+        parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
+        parametros['total'] = int(input("Ingrese el precio total de la venta"))
+        parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
+        parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
+        parametros['saldo'] = parametros['total'] - parametros['adelanto']
+        return parametros
+
 
 class Menu:
     def __init__(self):

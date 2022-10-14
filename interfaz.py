@@ -6,7 +6,7 @@ este archivo contiene interfaz, con las siguientes funcionalidades
 - ejecutar comando
 - salir
 """
-from .ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
+from ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
 
 MENU = """
 1- agregar cliente
