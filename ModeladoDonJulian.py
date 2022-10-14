@@ -142,6 +142,8 @@ class Venta:
         self.motivo = motivo
         self.saldo = self.total - self.adelanto
 
+    def __str__(self):
+        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega}'
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
         self.cliente = cliente
@@ -246,7 +248,7 @@ class RegistroDeClientes(Serializable):
     def __init__(self):
        super(RegistroDeClientes, self).__init__(Cliente)
 
-    def agregar_cliente_input (self):
+    def pedir_informacion_input(self):
         parametro = {} #dict()
         parametro['apellido'] = input ('apellido del cliente')
         parametro['nombre'] = input ('nombre del cliente')
@@ -278,10 +280,10 @@ class RegistroDeExtra(Serializable):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
 
-class RegistroDeVenta(Serializable):
+class RegistroDeVentas(Serializable):
 
     def __init__(self):
-        super(RegistroDeVenta).__init__(Venta)
+        super(RegistroDeVentas, self).__init__(Venta)
         self.registro_de_clientes = RegistroDeClientes()
         self.registro_de_muebles = RegistroDeMuebles()
 
@@ -292,7 +294,7 @@ class RegistroDeVenta(Serializable):
         parametros['fecha_de_venta'] = datetime.datetime.now()
         parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
         parametros['total'] = int(input("Ingrese el precio total de la venta"))
-        parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
+        parametros['adelanto'] = int(inƒput("Ingrese cuanto deposito el clente como entrega"))
         parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
         parametros['saldo'] = parametros['total'] - parametros['adelanto']
         return parametros
