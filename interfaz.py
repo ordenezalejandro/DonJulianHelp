@@ -31,11 +31,12 @@ class Interfaz:
             comando = leer_comando()
             self.ejecutar_comando(comando)
             imprimir_menu()
+
     def salir(self):
-        self.corriento = False
+        self.corriendo = False
         print("nos vemos")
-        self.registro_de_clientes.guardar_clientes()
-        self.registro_de_muebles.guardar_muebles()
+        self.registro_de_clientes.guardar()
+        self.registro_de_muebles.guardar()
     #     todo: implementar la funcion guardar muebles
     def ejecutar_comando(self,comando):
 
@@ -45,19 +46,19 @@ class Interfaz:
 
         else:
             if comando == 1 :
-                self.registro_de_clientes.agregar_cliente_input()
+                self.registro_de_clientes.agregar_input()
 
-            if  comando == 2:
-                self.registro_de_muebles.agregar_mueble_input()
+            if comando == 2:
+                self.registro_de_muebles.agregar_input()
             #     falta metodo
             if comando == 3:
-                self.registro_de_ventas.registrar_venta_input()
+                self.registro_de_ventas.agregar_input()
             if comando == 4:
-                self.registro_de_clientes.listar_cliente()
+                self.registro_de_clientes.listar()
             if comando == 5:
-                self.registro_de_muebles.listar_mueble()
+                self.registro_de_muebles.listar()
             if comando == 6:
-                self.registro_de_ventas.listar_ventas()
+                self.registro_de_ventas.listar()
             if comando== 7:
                 self.salir()
 #            no esta definido
@@ -73,7 +74,8 @@ def imprimir_menu():
 
 def leer_comando():
     """leer comando"""
-    comando = int(input("ingrese el comando"))
+    comando = input("ingrese el comando:\n")
+    comando = int(comando) if comando else -1
     return comando
 
     pass
