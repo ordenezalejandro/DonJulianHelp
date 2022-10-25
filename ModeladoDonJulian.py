@@ -1,7 +1,9 @@
+# coding: UTF8
 import datetime
 import json
 import os.path
 import pickle
+import shelve
 from operator import attrgetter
 
 class Mueble:
@@ -18,6 +20,7 @@ class Mueble:
             self.lista_de_extras = lista_de_extras
         self.precio = precio
         print('mueble_nuevo')
+
 
     def __eq__(self, other):
         return self.nombre == other.nombre and self.descripcion == self.descripcion and self.precio == self.precio
@@ -83,7 +86,8 @@ class Mueble:
 
         return costo_de_mueble
 
-
+    def __hash__(self):
+        return hash((self.nombre, self.descripcion))
         # TODO: pass
 
 
@@ -99,6 +103,7 @@ class Pieza:
         return (self.alto * self.ancho * self.espesor)/900
 
 
+
 class Extra:
     def __init__(self,nombre, descripcion, precio = 0):
         self.nombre = nombre
@@ -111,10 +116,18 @@ class Extra:
 
 class Cliente:
 
-    def __init__(self, nombre, apellido, edad):
+    def __init__(self, nombre, apellido, edad, domicilio=None, telefono=None):
         self.nombre = nombre
         self.apellido = apellido
         self.edad = edad
+        self.domicilio = domicilio
+        self.telefono = telefono
+
+    def es_igual(self, basica):
+        result = []
+        for attributo, valor in basica:
+            result.append(getattr(self, attributo) == valor)
+        return all(result)
 
     def __eq__(self, other):
        return self.nombre == other.nombre and self.apellido == other.apellido
@@ -126,10 +139,13 @@ class Cliente:
         return self.edad> otro_cliente.edad
 
     def __repr__(self):
-        return f'Cliente(**{self.__dict__})'
+        return f'Cliente(**{str(self.__dict__)})'
 
     def __str__(self):
         return f'fullname: {self.nombre}  {self.apellido}'
+
+    def __hash__(self):
+        return hash((self.apellido, self.nombre))
 
 class Venta:
     def __init__(self, cliente=None, mueble=None,fecha_de_entrega=None,total=None,adelanto=0,motivo=None):
@@ -144,6 +160,7 @@ class Venta:
 
     def __str__(self):
         return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega}'
+
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
         self.cliente = cliente
@@ -181,26 +198,30 @@ class Serializable:
         self.class_name = clase.__name__
         self.clase = clase
         directory = os.path.split(__file__)[0]
-        self.lista = [] # este seria en que antes usamos, lista_de_clientes, lista_de_muebgles etc
+        self.diccionario = {} # este seria en que antes usamos, lista_de_clientes, lista_de_muebgles etc
         # setattr(self, f'lista_de{self.class_name}s', None)
         self.data_path = os.path.join(directory, 'data', f'registro_de_{self.class_name}.json')
         self.cargar()
 
-    def get_lista(self):
-        return self.lista
+    def get_diccionario(self):
+        return self.diccionario
+
+    def get_to_dump(self):
+        return [(key, value.__dict__) for key, value in self.diccionario.items()]
 
     def cargar(self):
         if os.path.exists(self.data_path):
             with open(self.data_path, 'rb') as archivo:
                 # setattr(self.get_lista(), list(map(lambda x: Cliente(**x), json.load(archivo))))
-                self.lista = pickle.load(archivo)
+                self.diccionario = pickle.load(archivo)
         else:
             with open(self.data_path, 'wb') as archivo:
-                pickle.dump([], archivo)
-                self.lista = []
-        return self.get_lista()
+                pickle.dump({}, archivo)
+                self.diccionario = {}
+        return self.get_diccionario()
 
     def guardar(self):
+        # self.diccionario.close()
         with open(self.data_path, 'wb') as archivo:
             # todo: aqui me di cuenta que json.dump solo puede guardar objectos que contengan elementos basicos del lenguage, como clientes,
             #  es un ojbeto que nosotros creamos , es decir no es basico.  no serializable, accedi a cada cliente, el atributo __Dict__ que devuelve la representacion de eso.
@@ -208,39 +229,63 @@ class Serializable:
 
             # for instance in self.get_lista():
             #     instances.append(instance.__dict__)  # todo objeto en python tiene el atributo __dict__. que representa la instancia
-            pickle.dump(self.lista, archivo)
+            # lista = list(self.get_diccionario().items())
+            pickle.dump(self.diccionario, archivo, protocol=pickle.HIGHEST_PROTOCOL)
             # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
 
     def agregar(self, instance):
         assert type(instance) == self.clase
-        if instance in self.get_lista():
+        if instance in self.get_diccionario():
             print(f'el {self.class_name} ya ha sido cargado')
         else:
-            self.get_lista().append(instance)
+            self.get_diccionario().append(instance)
+
 
     def agregar_input(self):
-        parametros = self.pedir_informacion_input()
-        nueva_instancia = self.clase(**parametros)
-        if nueva_instancia in self.get_lista():
-            print(f'La instancia de {self.class_name} con valores {self.__dict__} ya existe')
+        # aqui pedimos la informacion basica
+        parametros = self.pedir_informacion_basica_input()
+        clave = tuple(parametros.values())
+        # nos preguntamos si la clave (es decir la informacion basica que pedimos ya esta)
+        if clave in self.get_diccionario():
+            # obtenemos el objeto que estaba asociado
+            instancia = self.get_diccionario()[clave]
+            print(f'Objecto {self.class_name} encontrada: {instancia}\n')
+            return instancia
         else:
-            self.get_lista().append(nueva_instancia)
+            print(f'No hemos encontrado el objeto {self.class_name} \n')
+            print(f'Solicitando datos para registrarlo')
+            # pasamos los datos basicos que pedimos, y pedimos el resto.
+            parametros = self.pedir_informacion_completa_input(parametros)
+        # instanciamos la clase con todo los datos que ya habiamos encontrados
+        nueva_instancia = self.clase(**parametros)
+        self.get_diccionario()[tuple(clave)] = nueva_instancia
+        self.guardar()
+        self.cargar()
         return nueva_instancia
 
-    def pedir_informacion_input(self):
+    def pedir_informacion_basica_input(self):
+        """"
+        Recordar que estas deben ser guardadas en el orden en el qeu se generan las claves primarias
+        ejemplo: si la informacion es apellido y nombre, es decir en el dicionario se va almacenar asi, deberian pedirse de la
+        siguiente forma
+        parametros['clave1'] = 'valor_clave_1'
+        parametros['clave2'] = 'valor_clave_2'
+        """
+        raise Exception("Esto metodo no se implemento")
+
+    def pedir_informacion_completa_input(self, parametros):
         """
         esto una interfaz, que deberia los datos necesario para crear una instancia nueva
-        debe devolver una dictionario con los parametros para instancianr una nueva instancia de la clase.
+        debe devolver una dictionario con los parametros para instanciar una nueva instancia de la clase.
         :return:
         """
         raise Exception('Este methodo deberia ser implementado')
 
     def listar(self):
-        for element in self.lista:
+        if not self.diccionario:
+            print(f'No hay ninguna instancia de {self.class_name} para mostrar')
+        for element in self.diccionario.values():
             print(element)
-    #
-    # def obtener_instance(self, **kargs):
-    #     claves = self.ingrese_claves()
 
 
 
@@ -248,13 +293,33 @@ class RegistroDeClientes(Serializable):
     def __init__(self):
        super(RegistroDeClientes, self).__init__(Cliente)
 
-    def pedir_informacion_input(self):
-        parametro = {} #dict()
-        parametro['apellido'] = input ('apellido del cliente\n')
-        parametro['nombre'] = input ('nombre del cliente\n')
-        parametro['edad'] = input ('ingrese la edad del cliente\n')
+    def pedir_informacion_completa_input(self, parametros):
+        parametros['edad'] = input ('ingrese la edad del cliente\n')
+        parametros['domicilio'] = input('ingrese el domicilio\n')
 
+        return parametros
+
+    def pedir_informacion_basica_input(self):
+        parametro = {} #dict()
+        parametro['apellido'] = input('apellido del cliente\n')
+        parametro['nombre'] = input('nombre del cliente\n')
         return parametro
+    def borrar_cliente(self):
+        parametro = {}  # dict()
+        parametro['apellido'] = input('apellido del cliente\n')
+        parametro['nombre'] = input('nombre del cliente\n')
+        clave = tuple(parametro.values())
+        # nos preguntamos si la clave (es decir la informacion basica que pedimos ya esta)
+        if clave in self.get_diccionario():
+            self.get_diccionario().pop(clave)
+            self.guardar()
+            self.cargar()
+            print( f'se borro exitosamente el cliente {self.apelliedo} {self.mombre}')
+        else:
+            print('el cliente no estaba registrado')
+
+
+
 
 
 
@@ -262,10 +327,14 @@ class RegistroDeMuebles(Serializable):
     def __init__(self):
         super(RegistroDeMuebles, self).__init__(Mueble)
 
-    def pedir_informacion_input(self):
+    def pedir_informacion_basica_input(self):
         parametros = {}
         parametros['nombre'] = input('Ingrese el nombre del mueble\n')
         parametros['descripcion'] = input('Ingrese el descripcion del mueble\n')
+
+        return parametros
+
+    def pedir_informacion_completa_input(self, parametros):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
 
@@ -273,11 +342,14 @@ class RegistroDeExtra(Serializable):
     def __init__(self):
         super(RegistroDeExtra, self).__init__(Pieza)
 
-    def pedir_informacion_input(self):
+    def pedir_informacion_completa_input(self, parametros):
+        parametros['precio'] = input('Ingrese el precio del mueble\n')
+
+    def pedir_informacion_basica_input(self):
         parametros = {}
         parametros['nombre'] = input('Ingrese el nombre del mueble\n')
         parametros['descripcion'] = input('Ingrese el descripcion del mueble\n')
-        parametros['precio'] = input('Ingrese el precio del mueble\n')
+
         return parametros
 
 class RegistroDeVentas(Serializable):
@@ -287,15 +359,19 @@ class RegistroDeVentas(Serializable):
         self.registro_de_clientes = RegistroDeClientes()
         self.registro_de_muebles = RegistroDeMuebles()
 
-    def pedir_informacion_input(self):
+    def pedir_informacion_basica_input(self):
         parametros = {}
         parametros['cliente'] = self.registro_de_clientes.agregar_input()
         parametros['mueble'] = self.registro_de_muebles.agregar_input()
         parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
+
+        return parametros
+
+    def pedir_informacion_completa_input(self, parametros):
         parametros['total'] = int(input("Ingrese el precio total de la venta"))
         parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
         parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
-        parametros['saldo'] = parametros['total'] - parametros['adelanto']
+
         return parametros
 
 
