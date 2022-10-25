@@ -74,7 +74,7 @@ def imprimir_menu():
 
 def leer_comando():
     """leer comando"""
-    comando = input("ingrese el comando:\n")
+    comando = input("ingrese el comando: \n")
     comando = int(comando) if comando else -1
     return comando
 

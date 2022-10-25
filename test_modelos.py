@@ -1,7 +1,6 @@
 from ModeladoDonJulian import Mueble,Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes,RegistroDeMuebles
-from ejercicios import total_componentes
+from tareas.ejercicios import total_componentes
 from unittest.mock import patch
-from datetime import datetime
 import unittest
 
 class Test_total_de_componente(unittest.TestCase):

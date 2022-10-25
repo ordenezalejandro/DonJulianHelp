@@ -250,9 +250,9 @@ class RegistroDeClientes(Serializable):
 
     def pedir_informacion_input(self):
         parametro = {} #dict()
-        parametro['apellido'] = input ('apellido del cliente')
-        parametro['nombre'] = input ('nombre del cliente')
-        parametro['edad'] = input ('ingrese la edad del cliente')
+        parametro['apellido'] = input ('apellido del cliente\n')
+        parametro['nombre'] = input ('nombre del cliente\n')
+        parametro['edad'] = input ('ingrese la edad del cliente\n')
 
         return parametro
 
@@ -291,10 +291,9 @@ class RegistroDeVentas(Serializable):
         parametros = {}
         parametros['cliente'] = self.registro_de_clientes.agregar_input()
         parametros['mueble'] = self.registro_de_muebles.agregar_input()
-        parametros['fecha_de_venta'] = datetime.datetime.now()
         parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
         parametros['total'] = int(input("Ingrese el precio total de la venta"))
-        parametros['adelanto'] = int(inƒput("Ingrese cuanto deposito el clente como entrega"))
+        parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
         parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
         parametros['saldo'] = parametros['total'] - parametros['adelanto']
         return parametros
