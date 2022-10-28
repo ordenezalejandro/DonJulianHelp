@@ -263,6 +263,16 @@ class Serializable:
         self.cargar()
         return nueva_instancia
 
+    def borrar(self):
+        parametros = self.pedir_informacion_basica_input()
+        clave = tuple(parametros.values())
+        if clave in self.get_diccionario():
+            self.get_diccionario().pop(clave)
+            print(f"El objecto {self.class_name} con valores {clave} se borro exitosamente")
+        else:
+            print(f'No se encotro instancia de {self.class_name} con estos valores {clave}')
+        self.guardar()
+        self.cargar()
     def pedir_informacion_basica_input(self):
         """"
         Recordar que estas deben ser guardadas en el orden en el qeu se generan las claves primarias
@@ -288,7 +298,6 @@ class Serializable:
             print(element)
 
 
-
 class RegistroDeClientes(Serializable):
     def __init__(self):
        super(RegistroDeClientes, self).__init__(Cliente)
@@ -304,20 +313,6 @@ class RegistroDeClientes(Serializable):
         parametro['apellido'] = input('apellido del cliente\n')
         parametro['nombre'] = input('nombre del cliente\n')
         return parametro
-    def borrar_cliente(self):
-        parametro = {}  # dict()
-        parametro['apellido'] = input('apellido del cliente\n')
-        parametro['nombre'] = input('nombre del cliente\n')
-        clave = tuple(parametro.values())
-        # nos preguntamos si la clave (es decir la informacion basica que pedimos ya esta)
-        if clave in self.get_diccionario():
-            self.get_diccionario().pop(clave)
-            self.guardar()
-            self.cargar()
-            print( f'se borro exitosamente el cliente {self.apelliedo} {self.mombre}')
-        else:
-            print('el cliente no estaba registrado')
-
 
 
 
@@ -374,6 +369,28 @@ class RegistroDeVentas(Serializable):
 
         return parametros
 
+    def listar_por_cliente(self, cliente):
+        # recorrer las ventas
+        result = []
+        for claves, venta in self.diccionario.items():
+            if claves and cliente == claves[0]:
+                result.append(venta)
+
+        return result
+
+    def imprimir_ventas_de_cliente(self):
+        claves = tuple(self.registro_de_clientes.pedir_informacion_basica_input().values())
+        if claves not in self.registro_de_clientes.diccionario:
+            print(f'El cliente {claves[0]} {claves[1]} no existe')
+            return False
+        cliente = self.registro_de_clientes.diccionario[claves]
+        ventas = self.listar_por_cliente(cliente)
+        for venta in ventas:
+            print(venta)
+        # fijarnos que pertenezca al cliente
+
+        # pertenece los guardamos en un lugar
+        # develvor la lista
 
 class Menu:
     def __init__(self):

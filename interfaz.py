@@ -17,7 +17,9 @@ MENU = """
 4- lista de cliente
 5- listar mueble
 6- listar venta
-7- salir
+7 -borrar cliente
+8 - imprimir ventas por clientes
+9- salir
 """
 class Interfaz:
     def __init__(self):
@@ -43,9 +45,10 @@ class Interfaz:
         self.registro_de_clientes.guardar()
         self.registro_de_muebles.guardar()
     #     todo: implementar la funcion guardar muebles
+
     def ejecutar_comando(self,comando):
 
-        if comando not in (1,2,3,4,5,6,7,8):
+        if comando not in (1,2,3,4,5,6,7,8,9):
 
             self.comando_invalido()
 
@@ -66,7 +69,9 @@ class Interfaz:
                 self.registro_de_ventas.listar()
             if comando == 7:
                 self.registro_de_clientes.borrar()
-            if comando== 8:
+            if comando == 8:
+                self.registro_de_ventas.imprimir_ventas_de_cliente()
+            if comando == 9:
                 self.salir()
 #            no esta definido
     def comando_invalido(self):
@@ -88,117 +93,3 @@ def leer_comando():
     return comando
 
     pass
-
-def flippingBits(n):
-    # Write your code here
-    bytes = []
-    resto = n%2
-    partial = n
-    while partial > 0:
-        bytes.append(resto)
-        partial = partial//2
-        resto = partial%2
-    bytes.reverse()
-    bytes = (32-len(bytes))*[0] + bytes
-    result = 0
-    bytes = list(map(lambda x: int(not(x)), bytes))
-    for index, byte in enumerate(reversed(bytes)):
-        result +=byte*(2**index)
-    return result
-import math
-def primality(n):
-
-    for num in range(1, int(math.isqrt(n)+1)):
-        if n % int(num) == 0:
-            return False
-    return True
-
-
-from functools import partial
-from itertools import combinations, combinations_with_replacement
-from collections import defaultdict
-
-
-class Solution:
-    def canPartitionKSubsets(self, nums, k):
-        generate_subset = partial(combinations, nums)
-        supersets = map(generate_subset, range(len(nums)))
-        result = defaultdict(list)
-        for subsets in supersets:
-            for set_ in subsets:
-                sum_ = sum(set_)
-
-                result[sum_].append(set_)
-
-        posibles = filter(lambda x: len(x) >= k, result.values())
-        from collections import Counter
-        for supersets in posibles:
-            nums_ = Counter(copy(nums))
-            acumulado = []
-            for set_ in supersets:
-                if set(set_).issubset(nums_.elements()):
-                    nums_ -= Counter(set_)
-                    acumulado.append(set_)
-
-                if not nums_:
-                    print(acumulado)
-                    if len(acumulado) >= k:
-                        # print(acumulado)
-                        return True
-
-        # print(acumulado)
-        return False
-
-
-class Solution2:
-    def canPartitionKSubsets(self, nums, k) :
-
-        nums_sum = sum(nums)
-        if nums_sum % k != 0:
-            return False
-        subset_sum = nums_sum / k
-
-        ks = [0] * k
-        nums.sort(reverse=True)
-        visited = [False] * len(nums)
-
-        def can_partition(rest_k, cur_sum=0, next_index=0):
-            if rest_k == 1:
-                return True
-
-            if cur_sum == subset_sum:
-                return can_partition(rest_k - 1)
-
-            for i in range(next_index, len(nums)):
-                if not visited[i] and cur_sum + nums[i] <= subset_sum:
-                    visited[i] = True
-                    if can_partition(rest_k, cur_sum=cur_sum + nums[i], next_index=i + 1):
-                        return True
-                    visited[i] = False
-            return False
-
-        return can_partition(k)
-
-
-
-
-
-import unittest
-class test_fli(unittest.TestCase):
-
-    def test_2(self):
-        result = flippingBits(4)
-        self.assertEqual(result, 4294967291)
-
-    def test_prim(self):
-        result = primality(1)
-        self.assertEqual(True, result)
-
-    def test_solucion(self):
-        solucion = Solution()
-        self.assertEqual(True, solucion.canPartitionKSubsets([1,1,1,1,2,2,2,2], 2))
-        self.assertEqual(True, solucion.canPartitionKSubsets([1,1,1,1,2,2,2,2], 4))
-        self.assertEqual(True, solucion.canPartitionKSubsets([2,6,16,13,3,4,1,1,2,12], 3))
-        self.assertEqual(False, solucion.canPartitionKSubsets([1,1,1,1,9], 2))
-        self.assertEqual(False, solucion.canPartitionKSubsets([1,2,3,4], 3))
-        self.assertEqual(True, solucion.canPartitionKSubsets([1,1 ], 2))
