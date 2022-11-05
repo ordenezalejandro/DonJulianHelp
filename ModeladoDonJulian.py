@@ -21,6 +21,9 @@ class Mueble:
         self.precio = precio
         print('mueble_nuevo')
 
+    def __str__(self):
+        return f"{self.nombre} {self.descripcion}"
+
 
     def __eq__(self, other):
         return self.nombre == other.nombre and self.descripcion == self.descripcion and self.precio == self.precio
@@ -89,6 +92,7 @@ class Mueble:
     def __hash__(self):
         return hash((self.nombre, self.descripcion))
         # TODO: pass
+   
 
 
 class Pieza:
@@ -378,6 +382,24 @@ class RegistroDeVentas(Serializable):
 
         return result
 
+    def listar_venta_por_mueble(self, mueble):
+        result = []
+        for claves, venta in self.diccionario.items():
+            if claves and mueble == claves[1]:
+                result.append(venta)
+
+        return result
+
+    def imprimir_ventas_de_mueble(self):
+        claves = tuple(self.registro_de_muebles.pedir_informacion_basica_input().values())
+        if claves not in self.registro_de_muebles.diccionario:
+            print(f'el mueble {claves [0]} {claves [1]} no existe')
+            return False
+        mueble = self.registro_de_muebles.diccionario[claves]
+        ventas = self.listar_venta_por_mueble(mueble)
+        for mueble in ventas:
+            print(mueble)
+
     def imprimir_ventas_de_cliente(self):
         claves = tuple(self.registro_de_clientes.pedir_informacion_basica_input().values())
         if claves not in self.registro_de_clientes.diccionario:
@@ -391,6 +413,45 @@ class RegistroDeVentas(Serializable):
 
         # pertenece los guardamos en un lugar
         # develvor la lista
+
+    def total_de_ventas(self):
+
+        """una nueva funcionalidad , para que el usuario puedo consultar todos las ventas,
+           y la funcionalidad debe sumar toodas las ventas realizadas
+        """
+        result = []
+
+        for venta in self.diccionario.values():
+            result.append(venta.total)
+        print(f' El total de las ventas es:/n $', sum(result))
+
+    def gasto_por_cliente(self):
+
+        """("gasto por cliente"), el sistema deberia pedir, que cliente,..etc, luego antes de
+        escribir el codigo escribilo como lo harias, agregar  la nueva funcion, agregar el comando,
+         definir el comando, el comando debe pedir al usuario la informacio basica del cliente, obter el cliente,
+        y buscar despus las ventas de ese cliente, y sumar el mono de esas especicficas venas.
+        """
+        claves = tuple(self.registro_de_clientes.pedir_informacion_basica_input().values())
+        if claves not in self.registro_de_clientes.diccionario:
+            print(f'El cliente {claves[0]} {claves[1]} no existe')
+            return False
+        cliente = self.registro_de_clientes.diccionario[claves]
+        ventas = self.listar_por_cliente(cliente)
+            # metodo 1 for
+        total = 0
+        for venta in ventas:
+            total += venta.total
+
+        print(f' El monto de ventas del cliente es:/n $', total)
+
+        #metodo 2 sum+compresion
+        print(f' El monto de ventas del cliente es:/n $', sum([venta.total for venta in ventas]))
+
+        # metodo 3 sum+lamda+map
+        print(f' El monto de ventas del cliente es:/n $', sum(map(lambda venta:venta.total,ventas )))
+
+
 
 class Menu:
     def __init__(self):

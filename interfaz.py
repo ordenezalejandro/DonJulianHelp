@@ -19,7 +19,10 @@ MENU = """
 6- listar venta
 7 -borrar cliente
 8 - imprimir ventas por clientes
-9- salir
+9- listar venta por mueble 
+10- consultar montos de ventas
+11- gasto por cliente
+12- salir
 """
 class Interfaz:
     def __init__(self):
@@ -48,7 +51,7 @@ class Interfaz:
 
     def ejecutar_comando(self,comando):
 
-        if comando not in (1,2,3,4,5,6,7,8,9):
+        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12):
 
             self.comando_invalido()
 
@@ -72,6 +75,12 @@ class Interfaz:
             if comando == 8:
                 self.registro_de_ventas.imprimir_ventas_de_cliente()
             if comando == 9:
+                self.registro_de_ventas.imprimir_ventas_de_mueble()
+            if comando == 10:
+                self.registro_de_ventas.total_de_ventas()
+            if comando == 11:
+                self.registro_de_ventas.gasto_por_cliente()
+            if comando == 12:
                 self.salir()
 #            no esta definido
     def comando_invalido(self):
