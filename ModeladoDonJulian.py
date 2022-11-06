@@ -107,7 +107,6 @@ class Pieza:
         return (self.alto * self.ancho * self.espesor)/900
 
 
-
 class Extra:
     def __init__(self,nombre, descripcion, precio = 0):
         self.nombre = nombre
@@ -198,14 +197,17 @@ class Venta:
 
 
 class Serializable:
-    def __init__(self, clase):
+    def __init__(self, clase, prefix='registro'):
         self.class_name = clase.__name__
         self.clase = clase
         directory = os.path.split(__file__)[0]
         self.diccionario = {} # este seria en que antes usamos, lista_de_clientes, lista_de_muebgles etc
         # setattr(self, f'lista_de{self.class_name}s', None)
-        self.data_path = os.path.join(directory, 'data', f'registro_de_{self.class_name}.json')
+        self.data_path = os.path.join(directory, 'data', f'{prefix}_de_{self.class_name}.json')
         self.cargar()
+
+    def __len__(self):
+        return len(self.diccionario)
 
     def get_diccionario(self):
         return self.diccionario
@@ -222,7 +224,7 @@ class Serializable:
             with open(self.data_path, 'wb') as archivo:
                 pickle.dump({}, archivo)
                 self.diccionario = {}
-        return self.get_diccionario()
+
 
     def guardar(self):
         # self.diccionario.close()
@@ -262,7 +264,7 @@ class Serializable:
             parametros = self.pedir_informacion_completa_input(parametros)
         # instanciamos la clase con todo los datos que ya habiamos encontrados
         nueva_instancia = self.clase(**parametros)
-        self.get_diccionario()[tuple(clave)] = nueva_instancia
+        self.get_diccionario()[clave] = nueva_instancia
         self.guardar()
         self.cargar()
         return nueva_instancia
@@ -277,6 +279,7 @@ class Serializable:
             print(f'No se encotro instancia de {self.class_name} con estos valores {clave}')
         self.guardar()
         self.cargar()
+
     def pedir_informacion_basica_input(self):
         """"
         Recordar que estas deben ser guardadas en el orden en el qeu se generan las claves primarias
@@ -303,8 +306,8 @@ class Serializable:
 
 
 class RegistroDeClientes(Serializable):
-    def __init__(self):
-       super(RegistroDeClientes, self).__init__(Cliente)
+    def __init__(self, prefix='registro'):
+       super(RegistroDeClientes, self).__init__(Cliente, prefix)
 
     def pedir_informacion_completa_input(self, parametros):
         parametros['edad'] = input ('ingrese la edad del cliente\n')
@@ -319,12 +322,9 @@ class RegistroDeClientes(Serializable):
         return parametro
 
 
-
-
-
 class RegistroDeMuebles(Serializable):
-    def __init__(self):
-        super(RegistroDeMuebles, self).__init__(Mueble)
+    def __init__(self, prefix='registro'):
+        super(RegistroDeMuebles, self).__init__(Mueble,prefix)
 
     def pedir_informacion_basica_input(self):
         parametros = {}
@@ -337,9 +337,10 @@ class RegistroDeMuebles(Serializable):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
 
+
 class RegistroDeExtra(Serializable):
-    def __init__(self):
-        super(RegistroDeExtra, self).__init__(Pieza)
+    def __init__(self, prefix='registro'):
+        super(RegistroDeExtra, self).__init__(Pieza,prefix)
 
     def pedir_informacion_completa_input(self, parametros):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
@@ -353,10 +354,10 @@ class RegistroDeExtra(Serializable):
 
 class RegistroDeVentas(Serializable):
 
-    def __init__(self):
-        super(RegistroDeVentas, self).__init__(Venta)
-        self.registro_de_clientes = RegistroDeClientes()
-        self.registro_de_muebles = RegistroDeMuebles()
+    def __init__(self, prefix='registro'):
+        super(RegistroDeVentas, self).__init__(Venta, prefix)
+        self.registro_de_clientes = RegistroDeClientes(prefix)
+        self.registro_de_muebles = RegistroDeMuebles(prefix)
 
     def pedir_informacion_basica_input(self):
         parametros = {}
@@ -451,7 +452,12 @@ class RegistroDeVentas(Serializable):
         # metodo 3 sum+lamda+map
         print(f' El monto de ventas del cliente es:/n $', sum(map(lambda venta:venta.total,ventas )))
 
-
+    def parchar_ventas(self):
+        for cliente, mueble, fecha in self.diccionario:
+            if cliente not in self.registro_de_clientes:
+                self.registro_de_clientes[(cliente.apellido, cliente.nombre)] = cliente
+            if mueble not in self.registro_de_muebles:
+                self.registro_de_muebles[(mueble.nombre, mueble.descripcion)] = mueble
 
 class Menu:
     def __init__(self):
