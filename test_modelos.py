@@ -1,4 +1,5 @@
-from ModeladoDonJulian import Mueble,Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes,RegistroDeMuebles
+from ModeladoDonJulian import Mueble, Pieza, Extra, Cliente, Venta, RegistroDeVentas, RegistroDeClientes, \
+    RegistroDeMuebles, Item
 from tareas.ejercicios import total_componentes
 from unittest.mock import patch
 import unittest
@@ -154,6 +155,12 @@ class Test_total_de_componente(unittest.TestCase):
         muebles = registro_mueble.cargar()
         self.assertEqual(2, len(muebles))
 
+    def test_items(self):
+        cajonera = Mueble('cajonera', '6 cajones', precio=100)
+        cocina = Mueble('cocina', 'antigua', 100)
+        item1 = Item(cajonera, 1)
+        item2 = Item(cocina, 2)
+        self.assertEqual(item1 + item2, 300, 'no esta sumando los precions bien')
 
 if __name__ == '__main__':
     unittest.main()
