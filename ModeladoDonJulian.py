@@ -26,7 +26,10 @@ class Mueble:
 
 
     def __eq__(self, other):
-        return self.nombre == other.nombre and self.descripcion == self.descripcion and self.precio == self.precio
+        if type(other) == tuple:
+            return other[0] == self.nombre and other[1] == self.descripcion
+        else:
+            return self.nombre == other.nombre and self.descripcion == self.descripcion and self.precio == self.precio
 
     def agregar_pieza(self,pieza):
         assert type(pieza) == Pieza
@@ -133,7 +136,10 @@ class Cliente:
         return all(result)
 
     def __eq__(self, other):
-       return self.nombre == other.nombre and self.apellido == other.apellido
+        if type(other) == tuple:
+            return other[0] == self.apellido and other[1] == self.nombre
+        else:
+            return self.nombre == other.nombre and self.apellido == other.apellido
 
     def __lt__(self, otro_cliente):
         return self.edad < otro_cliente.edad
@@ -454,10 +460,10 @@ class RegistroDeVentas(Serializable):
 
     def parchar_ventas(self):
         for cliente, mueble, fecha in self.diccionario:
-            if cliente not in self.registro_de_clientes:
-                self.registro_de_clientes[(cliente.apellido, cliente.nombre)] = cliente
-            if mueble not in self.registro_de_muebles:
-                self.registro_de_muebles[(mueble.nombre, mueble.descripcion)] = mueble
+            if cliente not in self.registro_de_clientes.diccionario:
+                self.registro_de_clientes.diccionario[(cliente.apellido, cliente.nombre)] = cliente
+            if mueble not in self.registro_de_muebles.diccionario:
+                self.registro_de_muebles.diccionario[(mueble.nombre, mueble.descripcion)] = mueble
 
 class Menu:
     def __init__(self):
