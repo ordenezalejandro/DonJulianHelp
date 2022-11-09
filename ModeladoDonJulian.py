@@ -6,6 +6,22 @@ import pickle
 import shelve
 from operator import attrgetter
 
+
+class Item:
+    def __init__(self, mueble, cantidad):
+        self.mueble = mueble
+        self.cantidad = cantidad
+
+
+    @property
+    def valor(self):
+        return float(self.mueble.precio)*float(self.cantidad)
+    def __str__(self):
+        return f'mueble: {self.mueble} cantidad {self.cantidad}'
+
+    def __add__(self, other):
+        return other.mueble.precio*other.cantidad + self.mueble.precio*self.cantidad
+
 class Mueble:
     def __init__(self,nombre, descripcion,precio,lista_de_piezas = None ,lista_de_extras = None):
         self.nombre = nombre
@@ -157,18 +173,22 @@ class Cliente:
         return hash((self.apellido, self.nombre))
 
 class Venta:
-    def __init__(self, cliente=None, mueble=None,fecha_de_entrega=None,total=None,adelanto=0,motivo=None):
+    def __init__(self, cliente=None, items=None,fecha_de_entrega=None,adelanto=0,motivo=None):
         self.cliente =cliente
-        self.mueble = mueble
+        self.items = items
+        self.cantidad = 1
         self.fecha_de_venta = datetime.datetime.now()
         self.fecha_de_entrega = fecha_de_entrega
-        self.total = total
+        self._total = 0
         self.adelanto = adelanto
         self.motivo = motivo
         self.saldo = self.total - self.adelanto
+    @property
+    def total(self):
+        return sum([int(item.valor) for item in self.items])
 
     def __str__(self):
-        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega}'
+        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo}'
 
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
@@ -252,9 +272,21 @@ class Serializable:
         else:
             self.get_diccionario().append(instance)
 
+    def agregar_multiple_input(self):
+        lista = []
+        agregar_nueva_instancia = True
+        while agregar_nueva_instancia:
+            instancia = self.agregar_input()
+            respuesta = input(f'Desea agregar otro {self.class_name} inglrese Y para si or N para no\n')
+            lista.append(instancia)
+            if respuesta != 'Y':
+                agregar_nueva_instancia = False
+
+        return lista
 
     def agregar_input(self):
         # aqui pedimos la informacion basica
+
         parametros = self.pedir_informacion_basica_input()
         clave = tuple(parametros.values())
         # nos preguntamos si la clave (es decir la informacion basica que pedimos ya esta)
@@ -310,6 +342,20 @@ class Serializable:
         for element in self.diccionario.values():
             print(element)
 
+class RegistroDeItems(Serializable):
+    def __init__(self, registro_de_muebles, prefix='registro'):
+        super(RegistroDeItems, self).__init__(Item, prefix)
+        self.registro_mueble = registro_de_muebles
+
+    def pedir_informacion_basica_input(self):
+        parametros = {}
+        parametros['mueble'] = self.registro_mueble.agregar_input()
+        parametros['cantidad'] = int(input('ingrese la cantidad\n') or '1')
+
+        return parametros
+
+    def pedir_informacion_completa_input(self, parametros):
+        return parametros
 
 class RegistroDeClientes(Serializable):
     def __init__(self, prefix='registro'):
@@ -364,17 +410,27 @@ class RegistroDeVentas(Serializable):
         super(RegistroDeVentas, self).__init__(Venta, prefix)
         self.registro_de_clientes = RegistroDeClientes(prefix)
         self.registro_de_muebles = RegistroDeMuebles(prefix)
+        self.registro_de_items = RegistroDeItems(self.registro_de_muebles)
 
     def pedir_informacion_basica_input(self):
         parametros = {}
         parametros['cliente'] = self.registro_de_clientes.agregar_input()
-        parametros['mueble'] = self.registro_de_muebles.agregar_input()
         parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
+        parametros['items'] = self.registro_de_muebles.agregar_multiple_input()
 
         return parametros
 
+    def agregar_input(self):
+        # aqui pedimos la informacion basica
+        parametros = {}
+        cliente = self.registro_de_clientes.agregar_input()
+        items = self.registro_de_items.agregar_multiple_input()
+        fecha_de_entrega = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
+        nueva_instancia = Venta(cliente, items)
+        return
+
     def pedir_informacion_completa_input(self, parametros):
-        parametros['total'] = int(input("Ingrese el precio total de la venta"))
+        #parametros['total'] = int(input("Ingrese el precio total de la venta"))
         parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
         parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
 
@@ -430,7 +486,9 @@ class RegistroDeVentas(Serializable):
 
         for venta in self.diccionario.values():
             result.append(venta.total)
-        print(f' El total de las ventas es:/n $', sum(result))
+        total = sum(result)
+        print(f' El total de las ventas es:/n $', total)
+        return total
 
     def gasto_por_cliente(self):
 

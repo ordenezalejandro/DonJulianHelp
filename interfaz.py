@@ -30,7 +30,7 @@ class Interfaz:
     def __init__(self,prefix='registro'):
         self.registro_de_ventas = RegistroDeVentas(prefix)
         self.registro_de_clientes = self.registro_de_ventas.registro_de_clientes
-        self.registro_de_muebles = self.registro_de_ventas.registro_de_clientes
+        self.registro_de_muebles = self.registro_de_ventas.registro_de_muebles
         self.corriendo = True
 
     def __enter__(self):

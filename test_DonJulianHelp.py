@@ -60,6 +60,47 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(interfaz.registro_de_clientes), 1, 'el cliente no fue agregado')
 
 
+    def test_total_venta(self):
+        side_effect = [
+            '1',
+            'ordonez', 'jairo', '31', 'roberto sironi',
+            '3',
+            'ordonez', 'jairo', 'cocina', 'romana', '10000'  '12-12-2023', '14000', '10000', 'refaccion',
+            '3',
+            'ordonez', 'jairo', 'mesa', 'romana', '10000', '12-12-2023', '16000', '10000', 'refaccion',
+            '10',
+            '12'
+        ]
+        with patch('builtins.input', side_effect=side_effect):
+            with Interfaz('test_1') as interfaz:
+                interfaz.iniciar_programa()
+        self.assertEqual(interfaz.registro_de_ventas.total_de_ventas() == 30000, 'la suma no esta correcta')
+
+    def test_agregar_venta_con_multiples_mubles(self):
+        side_effect = datos_basicos() + [
+            '3',
+            'ordonez', 'jairo', 'cocina', 'romana', '1', 'no',
+            '3',
+            'ordonez', 'jairo', 'mesa', 'victoriana', '1', 'si', 'silla', 'victoriana', '6', 'no'
+            '12',
+        ]
+        with patch('builtins.input', side_effect=side_effect):
+            with Interfaz('test_1') as interfaz:
+                interfaz.iniciar_programa()
+        self.assertEqual(interfaz.registro_de_ventas.total_de_ventas() == 30000, 'la suma no esta correcta')
+
+
+def datos_basicos():
+    """ return una lista con muebles y cleintes cargados"""
+    side_effect = [
+        '1',
+        'ordonez', 'jairo', '31', 'roberto sironi',
+        '2',
+        'cocina', 'romana', '1000',
+        '2', 'mesa', 'victoriana', '20000',
+        '2', 'silla', 'victoriana', '500'
+    ]
+
 
 if __name__ == '__main__':
     unittest.main()
