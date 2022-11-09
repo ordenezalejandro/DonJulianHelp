@@ -162,7 +162,7 @@ class Venta:
         self.saldo = self.total - self.adelanto
 
     def __str__(self):
-        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega}'
+        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo}'
 
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)

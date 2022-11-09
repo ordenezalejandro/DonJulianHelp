@@ -60,6 +60,22 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(interfaz.registro_de_clientes), 1, 'el cliente no fue agregado')
 
 
+    def test_total_venta(self):
+        side_effect = [
+            '1',
+            'ordonez', 'jairo', '31', 'roberto sironi',
+            '3',
+            'ordonez', 'jairo', 'cocina', 'romana', '14000', '12-12-2023', '14000', '10000', 'refaccion',
+            '3',
+            'ordonez', 'jairo', 'mesa', 'romana', '16000', '12-12-2023', '16000', '10000', 'refaccion',
+            '10'
+        ]
+        with patch('builtins.input', side_effect=side_effect):
+            with Interfaz('test_1') as interfaz:
+                interfaz.iniciar_programa()
+        self.assertEqual(interfaz.registro_de_ventas.total_de_ventas() == 30000, 'la suma no esta correcta')
+
+
 
 if __name__ == '__main__':
     unittest.main()
