@@ -147,8 +147,8 @@ class Cliente:
 
     def es_igual(self, basica):
         result = []
-        for attributo, valor in basica:
-            result.append(getattr(self, attributo) == valor)
+        for atributo, valor in basica:
+            result.append(getattr(self, atributo) == valor)
         return all(result)
 
     def __eq__(self, other):

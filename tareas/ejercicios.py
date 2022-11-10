@@ -132,5 +132,37 @@ def separar_sub_20(lista_de_personas):
 
     return menor_de_20, mayor_20
 
+def editar_informacion(self):
+
+# pedimos informacion
+# preguntamos que dato informacion/dato quiere cambiar
+# actualizamos la informacion
+# preguntamos si desea hacer algun cambio mas
+# retornamos la informacion actualizada
+def agregar_input(self):
+    # aqui pedimos la informacion basica
+
+    parametros = self.pedir_informacion_basica_input()
+    clave = tuple(parametros.values())
+    # nos preguntamos si la clave (es decir la informacion basica que pedimos ya esta)
+    if clave in self.get_diccionario():
+        # obtenemos el objeto que estaba asociado
+        instancia = self.get_diccionario()[clave]
+        print(f'Objecto {self.class_name} encontrada: {instancia}\n')
+        return instancia
+    else:
+        print(f'No hemos encontrado el objeto {self.class_name} \n')
+
+    while
+
+        # print(f'Solicitando datos para registrarlo')
+        # pasamos los datos basicos que pedimos, y pedimos el resto.
+        parametros = self.pedir_informacion_completa_input(parametros)
+    # instanciamos la clase con todo los datos que ya habiamos encontrados
+    nueva_instancia = self.clase(**parametros)
+    self.get_diccionario()[clave] = nueva_instancia
+    self.guardar()
+    self.cargar()
+    return nueva_instancia
 
 
