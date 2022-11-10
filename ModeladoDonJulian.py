@@ -556,7 +556,7 @@ class RegistroDeVentas(Serializable):
                     updates[(cliente, fecha, self.index)] = venta
 
             else:
-                if venta.index == None:
+                if venta.index == None or not hasattr(venta, 'index'):
                     self.index += 1
                     venta.index = self.index
         for keys in deletes:
