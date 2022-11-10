@@ -5,6 +5,7 @@ import os.path
 import pickle
 import shelve
 from operator import attrgetter
+import operator
 
 
 class Item:
@@ -173,7 +174,7 @@ class Cliente:
         return hash((self.apellido, self.nombre))
 
 class Venta:
-    def __init__(self, cliente=None, items=None,fecha_de_entrega=None,adelanto=0,motivo=None):
+    def __init__(self, cliente=None, items=None,fecha_de_entrega=None,adelanto=0,motivo=None, index=None):
         self.cliente =cliente
         self.items = items
         self.cantidad = 1
@@ -183,12 +184,14 @@ class Venta:
         self.adelanto = adelanto
         self.motivo = motivo
         self.saldo = self.total - self.adelanto
+        self.index = index
+
     @property
     def total(self):
         return sum([int(item.valor) for item in self.items])
 
     def __str__(self):
-        return f'Cliente:{self.cliente} , mueble: {self.mueble.nombre} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo}'
+        return f'Cliente:{self.cliente} , items: {",".join(map(str, self.items))} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo} , numero de venta#{self.index}'
 
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
@@ -277,13 +280,12 @@ class Serializable:
         agregar_nueva_instancia = True
         while agregar_nueva_instancia:
             instancia = self.agregar_input()
-            respuesta = input(f'Desea agregar otro {self.class_name} inglrese Y para si or N para no\n')
+            respuesta = str(input(f'Desea agregar otro {self.class_name} inglrese Y para si or N para no\n')).upper()
             lista.append(instancia)
             if respuesta != 'Y':
                 agregar_nueva_instancia = False
 
         return lista
-
     def agregar_input(self):
         # aqui pedimos la informacion basica
 
@@ -405,34 +407,40 @@ class RegistroDeExtra(Serializable):
         return parametros
 
 class RegistroDeVentas(Serializable):
-
     def __init__(self, prefix='registro'):
         super(RegistroDeVentas, self).__init__(Venta, prefix)
         self.registro_de_clientes = RegistroDeClientes(prefix)
         self.registro_de_muebles = RegistroDeMuebles(prefix)
         self.registro_de_items = RegistroDeItems(self.registro_de_muebles)
+        self.index = max(map(operator.attrgetter('index'), self.diccionario.values()))
 
     def pedir_informacion_basica_input(self):
         parametros = {}
         parametros['cliente'] = self.registro_de_clientes.agregar_input()
-        parametros['fecha_de_entrega'] = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
-        parametros['items'] = self.registro_de_muebles.agregar_multiple_input()
+        parametros['items'] = self.registro_de_items.agregar_multiple_input()
 
         return parametros
+
 
     def agregar_input(self):
         # aqui pedimos la informacion basica
         parametros = {}
         cliente = self.registro_de_clientes.agregar_input()
         items = self.registro_de_items.agregar_multiple_input()
-        fecha_de_entrega = input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n')
-        nueva_instancia = Venta(cliente, items)
+
+        self.pedir_informacion_completa_input(parametros)
+        nueva_instancia = Venta(cliente, items, **parametros)
+        self.index += 1
+        self.diccionario[(cliente, self.index)] = nueva_instancia
         return
 
     def pedir_informacion_completa_input(self, parametros):
         #parametros['total'] = int(input("Ingrese el precio total de la venta"))
-        parametros['adelanto'] = int(input("Ingrese cuanto deposito el clente como entrega"))
-        parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)")
+        parametros['fecha_de_entrega'] = str(input('Ingrese la fecha de entrega en formato dd-mm-yyyy\n'))
+        parametros['adelanto'] = int(input("Ingrese cuanto deposito el cliente como entrega\n"))
+        parametros['motivo'] = input("Ingrese el motivo de la venta (o deje en blanco si no tiene motivo)\n")
+        self.index += 1
+        parametros['index'] = self.index
 
         return parametros
 
@@ -522,6 +530,40 @@ class RegistroDeVentas(Serializable):
                 self.registro_de_clientes.diccionario[(cliente.apellido, cliente.nombre)] = cliente
             if mueble not in self.registro_de_muebles.diccionario:
                 self.registro_de_muebles.diccionario[(mueble.nombre, mueble.descripcion)] = mueble
+
+    def parchar_items(self):
+        for keys, value in self.diccionario.items():
+            if not hasattr(value, 'items'):
+                value.items = [Item(value.mueble, cantidad=1)]
+        self.guardar()
+        self.cargar()
+
+    def parchar_indices(self):
+        deletes = []
+        updates = {}
+        for keys , venta in self.diccionario.items():
+
+            if len(keys) < 3:
+                deletes.append(keys) # para borrar si hay algo que no se cargo iben
+                continue
+            cliente, mueble, fecha = keys
+            if type(mueble) == Mueble:
+                if hasattr(venta, 'index') and venta.index > 0:
+                    deletes.append(keys)
+                else:
+                    self.index += 1
+                    venta.index = self.index
+                    updates[(cliente, fecha, self.index)] = venta
+
+            else:
+                if venta.index == None:
+                    self.index += 1
+                    venta.index = self.index
+        for keys in deletes:
+            del self.diccionario[keys]
+        self.diccionario.update(updates)
+        self.guardar()
+        self.cargar()
 
 class Menu:
     def __init__(self):
