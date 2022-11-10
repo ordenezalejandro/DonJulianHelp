@@ -25,6 +25,8 @@ MENU = """
 11- gasto por cliente
 12- salir
 13 - parchar ventas
+14 - parchar ventas para que funcionen los items
+15 - parchar ventas cambiar a nuevo indice
 """
 class Interfaz:
     def __init__(self,prefix='registro'):
@@ -64,7 +66,7 @@ class Interfaz:
 
     def ejecutar_comando(self,comando):
 
-        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12,13):
+        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12,13, 14,15):
 
             self.comando_invalido()
 
@@ -96,6 +98,11 @@ class Interfaz:
                 return self.salir()
             if comando == 13:
                 return self.registro_de_ventas.parchar_ventas()
+            if comando == 14:
+                return self.registro_de_ventas.parchar_items()
+            if comando == 15:
+                return self.registro_de_ventas.parchar_indices()
+
 #            no esta definido
     def comando_invalido(self):
         print("la opcion elegida esta fuera del menu")
