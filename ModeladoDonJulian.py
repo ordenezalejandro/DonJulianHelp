@@ -168,7 +168,7 @@ class Cliente:
         return f'Cliente(**{str(self.__dict__)})'
 
     def __str__(self):
-        return f'fullname: {self.nombre}  {self.apellido}'
+        return f'fullname: {self.nombre}  {self.apellido}, edad:{self.edad}'
 
     def __hash__(self):
         return hash((self.apellido, self.nombre))
@@ -375,6 +375,24 @@ class RegistroDeClientes(Serializable):
         parametro['nombre'] = input('nombre del cliente\n')
         return parametro
 
+    def editar_cliente(self):
+        parameters = self.pedir_informacion_basica_input()
+        keys = tuple(parameters.values())
+        if keys in self.diccionario:
+            cliente = self.diccionario[keys]
+        else:
+            print(f'No hay cliente con estas claves primarias{keys}')
+            return
+        atributo = input(f"ingrese el atributo que desea cambiar {list(cliente.__dict__.keys())}\n")
+        if hasattr(cliente, atributo):
+            old_type = type(getattr(cliente, atributo) if getattr(cliente, atributo)  is not None else '')
+            nuevo_valor = old_type(input('Ingrese el valor \n'))
+            setattr(cliente, atributo, nuevo_valor)
+        else:
+            print(f'el atributo {atributo} no se encuentra\n')
+        print(cliente)
+        self.guardar()
+        self.cargar()
 
 class RegistroDeMuebles(Serializable):
     def __init__(self, prefix='registro'):
@@ -543,7 +561,7 @@ class RegistroDeVentas(Serializable):
         updates = {}
         for keys , venta in self.diccionario.items():
 
-            if len(keys) < 3:
+            if len(keys) < 3: # estos serian las keys cuando solo se almacenaba con cliente, mueble, fecha
                 deletes.append(keys) # para borrar si hay algo que no se cargo iben
                 continue
             cliente, mueble, fecha = keys
