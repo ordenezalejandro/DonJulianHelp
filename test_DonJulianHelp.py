@@ -90,6 +90,28 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(interfaz.registro_de_ventas.total_de_ventas() == 30000, 'la suma no esta correcta')
 
 
+    def test_editar_venta(self):
+
+        datos_iniciales = datos_basicos()
+        comando_ejecutar= [
+            '18',
+            'ordonez', 'jairo','2',
+            '2',#elegir el item,
+            'cantidad',
+            '3',
+            'n',
+            '12'
+        ]
+        side_effect = datos_iniciales + comando_ejecutar
+        with patch('builtins.input', side_effect=side_effect):
+            with Interfaz('test_1') as interfaz:
+                interfaz.iniciar_programa()
+        venta = list(interfaz.registro_de_ventas.diccionario.values())[0]
+        self.assertEqual(venta.items[1].cantidad, 3, 'No cambio la cantidad')
+
+
+
+
 def datos_basicos():
     """ return una lista con muebles y cleintes cargados"""
     side_effect = [
@@ -97,9 +119,20 @@ def datos_basicos():
         'ordonez', 'jairo', '31', 'roberto sironi',
         '2',
         'cocina', 'romana', '1000',
-        '2', 'mesa', 'victoriana', '20000',
-        '2', 'silla', 'victoriana', '500'
+        '2',
+        'mesa', 'victoriana', '20000',
+        '2',
+        'silla', 'victoriana', '500',
+        '3', # ejecuto agregar venta
+        'ordonez', 'jairo', # elijo el cliente
+        'cocina', 'romana', '1',
+        'Y', # agregamos otro muble
+        'silla', 'reyna ana', '4500','4',
+        'n',
+        '12-12-2023',
+        '1000', 'no motivo'
     ]
+    return side_effect
 
 
 if __name__ == '__main__':

@@ -450,7 +450,39 @@ class RegistroDeVentas(Serializable):
         self.registro_de_clientes = RegistroDeClientes(prefix)
         self.registro_de_muebles = RegistroDeMuebles(prefix)
         self.registro_de_items = RegistroDeItems(self.registro_de_muebles)
-        self.index = max(map(operator.attrgetter('index'), self.diccionario.values()))
+        if len(self.diccionario) ==0:
+            self.index = 0
+        else:
+            self.index = max(map(operator.attrgetter('index'), self.diccionario.values()))
+
+    def editar_venta(self):
+        parametros = {}
+        parametros['cliente'] = self.registro_de_clientes.agregar_input()
+        parametros['index'] = int(input('Ingrese el numero de venta\n'))
+        keys = tuple(parametros.values())
+        if keys not in self.diccionario:
+            print(f'No existe ninguna venta con esos parametros {keys}')
+            return
+        else:
+            venta = self.diccionario[keys]
+            continuar = True
+            while continuar:
+                for indice, item in enumerate(venta.items, 1):
+                    print(f"#{indice}' item {item}")
+                indice = int(input('Elija el item a edita ingresando el indice del item(#indice))#\n'))
+                if 1 <= indice  <= len(venta.items):
+                    item = venta.items[indice-1]
+                    atributo = input(f"ingrese el atributo que desea cambiar {list(item.__dict__.keys())}\n")
+                    if hasattr(item, atributo):
+                        old_type = type(getattr(item, atributo) if getattr(item, atributo) is not None else '')
+                        nuevo_valor = old_type(input('Ingrese el valor \n'))
+                        setattr(item, atributo, nuevo_valor)
+                        continuar = True if input('Desea seguir editando ingrese Y or not N en caso contrario\n').upper() == 'Y' else False
+                    else:
+                        print(f'el atributo {atributo} no se encuentra\n')
+                    print(item)
+                    self.guardar()
+                    self.cargar()
 
     def pedir_informacion_basica_input(self):
         parametros = {}
@@ -459,7 +491,7 @@ class RegistroDeVentas(Serializable):
 
         return parametros
 
-
+    
     def agregar_input(self):
         # aqui pedimos la informacion basica
         parametros = {}
@@ -470,6 +502,8 @@ class RegistroDeVentas(Serializable):
         nueva_instancia = Venta(cliente, items, **parametros)
         self.index += 1
         self.diccionario[(cliente, self.index)] = nueva_instancia
+        self.guardar()
+        self.cargar()
         return
 
     def pedir_informacion_completa_input(self, parametros):
@@ -573,6 +607,16 @@ class RegistroDeVentas(Serializable):
         for keys, value in self.diccionario.items():
             if not hasattr(value, 'items'):
                 value.items = [Item(value.mueble, cantidad=1)]
+        self.guardar()
+        self.cargar()
+
+    def parchar_fechas(self):
+        new_value = {}
+
+        for key, value in self.diccionario.items():
+            if len(key) >2:
+                new_value[(key[0], key[2])] = value
+        self.diccionario = new_value
         self.guardar()
         self.cargar()
 
