@@ -109,6 +109,7 @@ class Mueble:
 
         return costo_de_mueble
 
+
     def __hash__(self):
         return hash((self.nombre, self.descripcion))
         # TODO: pass
@@ -408,6 +409,25 @@ class RegistroDeMuebles(Serializable):
     def pedir_informacion_completa_input(self, parametros):
         parametros['precio'] = input('Ingrese el precio del mueble\n')
         return parametros
+
+    def editar_mueble(self):
+        parameters = self.pedir_informacion_basica_input()
+        keys = tuple(parameters.values())
+        if keys in self.diccionario:
+            mueble = self.diccionario[keys]
+        else:
+            print(f'No hay mueble con estas claves primarias{keys}')
+            return
+        atributo = input(f"ingrese el atributo que desea cambiar {list(mueble.__dict__.keys())}\n")
+        if hasattr(mueble, atributo):
+            old_type = type(getattr(mueble, atributo) if getattr(mueble, atributo) is not None else '')
+            nuevo_valor = old_type(input('Ingrese el valor \n'))
+            setattr(mueble, atributo, nuevo_valor)
+        else:
+            print(f'el atributo {atributo} no se encuentra\n')
+        print(mueble)
+        self.guardar()
+        self.cargar()
 
 
 class RegistroDeExtra(Serializable):

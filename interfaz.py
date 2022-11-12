@@ -28,6 +28,7 @@ MENU = """
 14 - parchar ventas para que funcionen los items
 15 - parchar ventas cambiar a nuevo indice
 16 - Editar cliente
+17 - Editar mueble
 """
 class Interfaz:
     def __init__(self,prefix='registro'):
@@ -67,7 +68,7 @@ class Interfaz:
 
     def ejecutar_comando(self,comando):
 
-        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12,13, 14,15, 16):
+        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12,13, 14,15, 16, 17):
 
             self.comando_invalido()
 
@@ -105,6 +106,8 @@ class Interfaz:
                 return self.registro_de_ventas.parchar_indices()
             if comando == 16:
                 return self.registro_de_clientes.editar_cliente()
+            if comando == 17:
+                return self.registro_de_muebles.editar_mueble()
 
 
 
