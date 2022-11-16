@@ -192,7 +192,7 @@ class Venta:
         return sum([int(item.valor) for item in self.items])
 
     def __str__(self):
-        return f'Cliente:{self.cliente} , items: {",".join(map(str, self.items))} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo} , numero de venta#{self.index}'
+        return f'Cliente:{self.cliente} , items: {",".join(map(str, self.items))} , fecha_entrega:{self.fecha_de_entrega} total:{self.total} , saldo:{self.saldo} , numero de venta#{self.index + 1}'
 
     def poner_cliente(self, cliente):
         assert isinstance(cliente, Cliente)
@@ -472,7 +472,7 @@ class RegistroDeVentas(Serializable):
                 indice = int(input('Elija el item a edita ingresando el indice del item(#indice))#\n'))
                 if 1 <= indice  <= len(venta.items):
                     item = venta.items[indice-1]
-                    atributo = input(f"ingrese el atributo que desea cambiar {list(item.__dict__.keys())}\n")
+                    atributo = input(f"ingrese el atributo que desea cambiar {set(item.__dict__.keys()) - set(['mueble'])}\n")
                     if hasattr(item, atributo):
                         old_type = type(getattr(item, atributo) if getattr(item, atributo) is not None else '')
                         nuevo_valor = old_type(input('Ingrese el valor \n'))
