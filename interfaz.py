@@ -1,37 +1,8 @@
-"""
-este archivo contiene interfaz, con las siguientes funcionalidades
-- iniciar programa
-- imprimir menu
-- leer comando
-- ejecutar comando
-- salir
-"""
-from copy import copy
+from ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
+from guizero import App, Window, ListBox, MenuBar, TitleBox
 import os
 
-from ModeladoDonJulian import RegistroDeVentas,RegistroDeClientes,RegistroDeMuebles
 
-MENU = """
-1- agregar cliente
-2- agrega mueble
-3- agregar venta
-4- lista de cliente
-5- listar mueble
-6- listar venta
-7 -borrar cliente
-8 - imprimir ventas por clientes
-9- listar venta por mueble 
-10- consultar montos de ventas
-11- gasto por cliente
-12- salir
-13 - parchar ventas
-14 - parchar ventas para que funcionen los items
-15 - parchar ventas cambiar a nuevo indice
-16 - Editar cliente
-17 - Editar mueble
-18 - Editar Venta
-19 - parchar fecha
-"""
 class Interfaz:
     def __init__(self,prefix='registro'):
         self.registro_de_ventas = RegistroDeVentas(prefix)
@@ -50,91 +21,95 @@ class Interfaz:
         if os.path.exists(self.registro_de_muebles.data_path):
             os.remove(self.registro_de_muebles.data_path)
 
-    def iniciar_programa(self):
-        imprimir_menu()
-        while self.corriendo == True:
-            comando = leer_comando()
-            if comando == -1:
-                self.comando_invalido()
-            else:
-                self.ejecutar_comando(comando)
-            imprimir_menu()
-
-    def salir(self):
-        self.corriendo = False
-        print("nos vemos")
-        self.registro_de_clientes.guardar()
-        self.registro_de_muebles.guardar()
-        self.registro_de_ventas.guardar()
-    #     todo: implementar la funcion guardar muebles
-
-    def ejecutar_comando(self,comando):
-
-        if comando not in (1,2,3,4,5,6,7,8,9,10,11,12,13, 14,15, 16, 17, 18, 19):
-
-            self.comando_invalido()
-
-        else:
-            if comando == 1 :
-                return self.registro_de_clientes.agregar_input()
-            if comando == 2:
-                return self.registro_de_muebles.agregar_input()
-            #     falta metodo
-            if comando == 3:
-                return self.registro_de_ventas.agregar_input()
-            if comando == 4:
-                return self.registro_de_clientes.listar()
-            if comando == 5:
-                return self.registro_de_muebles.listar()
-            if comando == 6:
-                return self.registro_de_ventas.listar()
-            if comando == 7:
-                return self.registro_de_clientes.borrar()
-            if comando == 8:
-                return self.registro_de_ventas.imprimir_ventas_de_cliente()
-            if comando == 9:
-                return self.registro_de_ventas.imprimir_ventas_de_mueble()
-            if comando == 10:
-                return self.registro_de_ventas.total_de_ventas()
-            if comando == 11:
-                return self.registro_de_ventas.gasto_por_cliente()
-            if comando == 12:
-                return self.salir()
-            if comando == 13:
-                return self.registro_de_ventas.parchar_ventas()
-            if comando == 14:
-                return self.registro_de_ventas.parchar_items()
-            if comando == 15:
-                return self.registro_de_ventas.parchar_indices()
-            if comando == 16:
-                return self.registro_de_clientes.editar_cliente()
-            if comando == 17:
-                return self.registro_de_muebles.editar_mueble()
-            if comando == 18:
-                return self.registro_de_ventas.editar_venta()
-            if comando == 19:
-                return self.registro_de_ventas.parchar_fechas()
+# def listar_muebles():
+#     print('asdfasdf')
+#     #return interfaz.registro_de_muebles.listar()
+# interfaz = Interfaz()
+#
+# def info_cliente(value):
+#     result = []
+#     for cliente in interfaz.registro_de_clientes.diccionario:
+#         if cliente[1] == value:
+#             result.append(f'name:{cliente[1]} last name:{cliente[0]}')
+#
+#     app.info('info', f'clientes que matchea {",".join(result)}\n')
+#
+# class persona:
+#     def __init__(self, nombre, apellido):
+#         self.nombre = nombre
+#         self.apellido = apellido
+#         self.edad = 30
+#         self.direccion = 'ropberto sironi'
+#
+#     def __str__(self):
+#         return f'{self.nombre}, {self.apellido}'
+# def mostrar_info(event):
+#     app.info('info', f'La informacion de la persona es{event.widget.value}')
+#
+# windows = Window(app, title="Cliente")
+# menubar = MenuBar(app,
+#                   toplevel=["Muebles", "Cliente"],
+#
+#                   options=[
+#                       [["Listar", interfaz.registro_de_muebles.listar], ["agregar", interfaz.registro_de_muebles.agregar]],
+#                       [["mostrar", windows.show], ["ocultar", windows.hide]]
+#                   ])
+# list_box = ListBox(windows, selected='jairo', items=[persona('jairo', 'ordonez'), persona('ale', 'ordonez'), persona('sami', 'ordonez')])
+# list_box.when_double_clicked = mostrar_info
 
 
+class clienteRow:
+    def __init__(self, ventana, cliente):
+        self.cliente = cliente
+        # self.box =
+class VentanaCliente:
 
-#            no esta definido
-    def comando_invalido(self):
-        print("la opcion elegida esta fuera del menu")
-        print("elija una opcion valida")
+    def __init__(self, app, registro_de_cliente):
+        self.ventana = Window(app, title='Clientes de DonJulian', visible=False)
+        self.title_box = TitleBox(self.ventana, 'Lista de clientes de DonJulian')
+        self.registro_cliente = registro_de_cliente
+        self.list_box = ListBox(self.ventana, items=self.registro_cliente.listar())
 
-def imprimir_menu():
-    """mostrar menu"""
-    print (MENU)
+    def cerrar(self):
+        self.ventana.hide()
+
+    def abrir(self):
+        self.ventana.show()
+
+class VentanaMueble:
+
+    def __init__(self, app, registro_mueble):
+        self.ventana = Window(app, title='Muebles de DonJulian', visible=False)
+        self.registro_mueble = registro_mueble
+
+    def cerrar(self):
+        self.ventana.hide()
+
+    def abrir(self):
+        self.ventana.show()
+
+class VentanaDonJulian:
+
+    def __init__(self):
+        self.app = App(
+            title="Don Julian",
+            width=800,
+            height=800,
+            layout="auto"
+        )
+        self.interfaz = Interfaz()
+        self.ventana_cliente = VentanaCliente(self.app, self.interfaz.registro_de_clientes)
+        self.ventana_mueble = VentanaMueble(self.app, self.interfaz.registro_de_muebles)
+        self.menu = MenuBar(self.app,
+                  toplevel=["Muebles", "Cliente"],
+                  options=[
+                      [["Mostrar", self.ventana_mueble.abrir], ["ocultar", self.ventana_mueble.cerrar]],
+                      [["mostrar", self.ventana_cliente.abrir], ["ocultar", self.ventana_cliente.cerrar]]
+                  ])
+
+        self.app.display()
 
 
-    pass
+if __name__ == '__main__':
+    don_julian = VentanaDonJulian()
 
-def leer_comando():
-    """leer comando"""
-    comando = input("ingrese el comando:\n")
-    if not comando.isdigit():
-        return -1
-    comando = int(comando) if comando else -1
-    return comando
-
-    pass

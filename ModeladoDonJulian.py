@@ -13,10 +13,10 @@ class Item:
         self.mueble = mueble
         self.cantidad = cantidad
 
-
     @property
     def valor(self):
         return float(self.mueble.precio)*float(self.cantidad)
+
     def __str__(self):
         return f'mueble: {self.mueble} cantidad {self.cantidad}'
 
@@ -341,9 +341,8 @@ class Serializable:
 
     def listar(self):
         if not self.diccionario:
-            print(f'No hay ninguna instancia de {self.class_name} para mostrar')
-        for element in self.diccionario.values():
-            print(element)
+            return []
+        return self.diccionario.values()
 
 class RegistroDeItems(Serializable):
     def __init__(self, registro_de_muebles, prefix='registro'):
