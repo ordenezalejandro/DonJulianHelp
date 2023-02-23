@@ -36,11 +36,12 @@ class Mueble:
         else:
             self.lista_de_extras = lista_de_extras
         self.precio = precio
+        self.obligatarios = ['nombre', 'apellido']
+        self.opcional = ['edad', 'domicilio', 'telefono']
         print('mueble_nuevo')
 
     def __str__(self):
         return f"{self.nombre} {self.descripcion}"
-
 
     def __eq__(self, other):
         if type(other) == tuple:
@@ -269,12 +270,7 @@ class Serializable:
             pickle.dump(self.diccionario, archivo, protocol=pickle.HIGHEST_PROTOCOL)
             # json.dump(list(map(attrgetter('__dict__'), self.listas_de_clientes)), archivo)
 
-    def agregar(self, instance):
-        assert type(instance) == self.clase
-        if instance in self.get_diccionario():
-            print(f'el {self.class_name} ya ha sido cargado')
-        else:
-            self.get_diccionario().append(instance)
+
 
     def agregar_multiple_input(self):
         lista = []
@@ -287,6 +283,7 @@ class Serializable:
                 agregar_nueva_instancia = False
 
         return lista
+
     def agregar_input(self):
         # aqui pedimos la informacion basica
 
@@ -304,6 +301,9 @@ class Serializable:
             # pasamos los datos basicos que pedimos, y pedimos el resto.
             parametros = self.pedir_informacion_completa_input(parametros)
         # instanciamos la clase con todo los datos que ya habiamos encontrados
+        return self.agregar_nueva_instancia(clave, parametros)
+
+    def agregar_nueva_instancia(self, clave, parametros):
         nueva_instancia = self.clase(**parametros)
         self.get_diccionario()[clave] = nueva_instancia
         self.guardar()
@@ -343,6 +343,14 @@ class Serializable:
         if not self.diccionario:
             return []
         return self.diccionario.values()
+
+    def listar_interfaz(self):
+        return [f'{nombre} | {description}' for nombre, description in self.diccionario]
+
+    def borrar_interfaz(self, value):
+        nombre, description = value.split(' | ')
+        del self.diccionario[(nombre, description)]
+        self.guardar()
 
 class RegistroDeItems(Serializable):
     def __init__(self, registro_de_muebles, prefix='registro'):
@@ -397,6 +405,13 @@ class RegistroDeClientes(Serializable):
 class RegistroDeMuebles(Serializable):
     def __init__(self, prefix='registro'):
         super(RegistroDeMuebles, self).__init__(Mueble,prefix)
+
+
+    def borrar_mueble(self, value):
+        if value not in self.diccionario:
+            print('esto no deberia haber pasado')
+        else:
+            self.diccionario.remove(value)
 
     def pedir_informacion_basica_input(self):
         parametros = {}
